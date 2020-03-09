@@ -50,8 +50,12 @@ Release/Targa View Release.exe
 
 Debug
 Debug_DL
-Imagem View/Debug_DL
 Release_DLL/
+
+Imagem View/Debug
+Imagem View/Debug_DL
+Imagem View/Release
+Imagem View/Release_DLL/
 
 Imagem View/Release/Targa View.vcxproj.FileListAbsolute.txt
 Imagem View/Release_DLL/Targa View.vcxproj.FileListAbsolute.txt
