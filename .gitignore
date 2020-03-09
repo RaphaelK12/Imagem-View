@@ -24,12 +24,14 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.out
 *.app
 Debug/Targa View.exe
+Release/Targa View.exe
+Debug_DL/Targa View.exe
+Release/Targa View Release.exe
 
 # Others
 *.vs
@@ -42,20 +44,15 @@ Debug/Targa View.exe
 *.tlog
 *.idb
 *.res
-Debug
-Targa View/Release/Targa View.vcxproj.FileListAbsolute.txt
-Debug_DL/Targa View_Debug_DL.exe
-Debug_DL/Targa View Debug_DL.exe
-Debug_DL/Imagem View Debug_DL.exe
-Imagem View/Debug_DL/Targa View.vcxproj.FileListAbsolute.txt
+*.exp
 *.bsc
 *.bak
-Release_DLL/Imagem View Release_DLL.exe
-Release_DLL/Targa View Release_DLL.exe
-*.exp
-Release/Targa View.exe
-Release_DLL/Targa View.exe
-Release/Targa View Release.exe
+
+Debug
+Debug_DL
+Imagem View/Debug_DL
+Release_DLL/
+
 Imagem View/Release/Targa View.vcxproj.FileListAbsolute.txt
 Imagem View/Release_DLL/Targa View.vcxproj.FileListAbsolute.txt
-Debug_DL/Targa View.exe
+Targa View/Release/Targa View.vcxproj.FileListAbsolute.txt
