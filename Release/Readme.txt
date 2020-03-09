@@ -1,1 +1,1 @@
-"View Targa.exe" is the current compiled executable file.
+"Imagem View Release.exe" is the current published compiled executable file.
