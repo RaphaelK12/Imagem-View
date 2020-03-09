@@ -166,9 +166,9 @@ int OpenImg(int get, HWND hwnd, const char * a)
 		SetDIBits(hdc, hbm1, 0, img->yres, img->pixels, bi, DIB_RGB_COLORS);
 	}
 	if (hbmmask) {
-		float alpha = 0;
+		float alpha = 0.f;
 		for (int x = 0; x < img->xres * img->yres; x++) {
-			alpha = img->pixels[x * 4 + 3] / 254.5;
+			alpha = img->pixels[x * 4 + 3] / 254.5f;
 			img->pixels[x * 4 + 0] *= alpha; //  img->pixels[x * 4 + 3];
 			img->pixels[x * 4 + 1] *= alpha; //  img->pixels[x * 4 + 3];
 			img->pixels[x * 4 + 2] *= alpha; //  img->pixels[x * 4 + 3];
@@ -290,8 +290,8 @@ void fitImage(int aling, int stretch, int screenx, int screeny, int imx, int imy
 	}
 	else if (aling == ID_ALING_CENTER) {
 		if (stretch == ID_STRETCH_FIXED) {
-			x_start = floorf((screenx / 2.0 - bmx / 2.0) + 0.5f);
-			y_start = floorf((screeny / 2.0 - bmy / 2.0) + 0.5f);
+			x_start = floorf((screenx / 2.f - bmx / 2.f) + 0.5f);
+			y_start = floorf((screeny / 2.f - bmy / 2.f) + 0.5f);
 			x_end = bmx;
 			y_end = bmy;
 		}
@@ -308,8 +308,8 @@ void fitImage(int aling, int stretch, int screenx, int screeny, int imx, int imy
 			x_end = floorf(x + 0.5f);
 			y_end = floorf(y + 0.5f);
 
-			x_start = floorf((screenx / 2.0 - x / 2.0) + 0.5f);
-			y_start = floorf((screeny / 2.0 - y / 2.0) + 0.5f);
+			x_start = floorf((screenx / 2.f - x / 2.f) + 0.5f);
+			y_start = floorf((screeny / 2.f - y / 2.f) + 0.5f);
 			x_start = max(x_start, 2);
 			y_start = max(y_start, 2);
 		}
@@ -323,10 +323,10 @@ void fitImage(int aling, int stretch, int screenx, int screeny, int imx, int imy
 			/*if (scy < y)*/ w2 = scy / y;
 			x = (bmx)*min(w1, w2);
 			y = (bmy)*min(w1, w2);
-			x_end = floorf(x + 0.5);
-			y_end = floorf(y + 0.5);
-			x_start = floorf((screenx / 2.0 - x / 2.0) + 0.5f);
-			y_start = floorf((screeny / 2.0 - y / 2.0) + 0.5f);
+			x_end = floorf(x + 0.5f);
+			y_end = floorf(y + 0.5f);
+			x_start = floorf((screenx / 2.f - x / 2.f) + 0.5f);
+			y_start = floorf((screeny / 2.f - y / 2.f) + 0.5f);
 			x_start = max(x_start, 2);
 			y_start = max(y_start, 2);
 		}
@@ -361,8 +361,8 @@ void fitImage(int aling, int stretch, int screenx, int screeny, int imx, int imy
 			/*if (scy < y)*/ w2 = scy / y;
 			x = (bmx)*min(w1, w2);
 			y = (bmy)*min(w1, w2);
-			x_end = floorf(x + 0.5);
-			y_end = floorf(y + 0.5);
+			x_end = floorf(x + 0.5f);
+			y_end = floorf(y + 0.5f);
 		}
 	}
 	else if (aling == ID_ALING_TOPRIGHT) {
@@ -396,7 +396,7 @@ void fitImage(int aling, int stretch, int screenx, int screeny, int imx, int imy
 			/*if (scy < y)*/ w2 = scy / y;
 			x = (bmx)*min(w1, w2);
 			y = (bmy)*min(w1, w2);
-			y_end = floorf(y + 0.5);
+			y_end = floorf(y + 0.5f);
 
 			x_start = (screenx - x) - 2;
 			x_end = x;
@@ -433,7 +433,7 @@ void fitImage(int aling, int stretch, int screenx, int screeny, int imx, int imy
 			/*if (scy < y)*/ w2 = scy / y;
 			x = (bmx)*min(w1, w2);
 			y = (bmy)*min(w1, w2);
-			x_end = floorf(x + 0.5);
+			x_end = floorf(x + 0.5f);
 			y_start = (screeny - y) - 2;
 			y_end = y;
 		}
@@ -485,14 +485,14 @@ void fitImage(int aling, int stretch, int screenx, int screeny, int imx, int imy
 	else {
 		x_start = 2;
 		y_start = 2;
-		x_end = screenx - 4;
-		y_end = screeny - 4;
+		x_end = float(screenx - 4);
+		y_end = float(screeny - 4);
 	}
 
-	rc->left = x_start;
-	rc->right = x_end;
-	rc->top = y_start;
-	rc->bottom = y_end;
+	rc->left = long(x_start);
+	rc->right = long(x_end);
+	rc->top = long(y_start);
+	rc->bottom = long(y_end);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
@@ -584,8 +584,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
 				//}
 				//else if (aling == ID_ALING_CENTER) {
 				//	if (stretch == ID_STRETCH_FIXED) {
-				//		x_start = floorf((screenx / 2.0 - bm.bmWidth / 2.0) + 0.5f);
-				//		y_start = floorf((screeny / 2.0 - bm.bmHeight / 2.0) + 0.5f);
+				//		x_start = floorf((screenx / 2.f - bm.bmWidth / 2.f) + 0.5f);
+				//		y_start = floorf((screeny / 2.f - bm.bmHeight / 2.f) + 0.5f);
 				//		x_end = bm.bmWidth;
 				//		y_end = bm.bmHeight;
 				//	}
@@ -600,8 +600,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
 				//		y = (bm.bmHeight) * min(w1, w2);
 				//		x_end = floorf(x + 0.5f);
 				//		y_end = floorf(y + 0.5f);
-				//		x_start = floorf((screenx / 2.0 - x / 2.0) + 0.5f);
-				//		y_start = floorf((screeny / 2.0 - y / 2.0) + 0.5f);
+				//		x_start = floorf((screenx / 2.f - x / 2.f) + 0.5f);
+				//		y_start = floorf((screeny / 2.f - y / 2.f) + 0.5f);
 				//		x_start = max(x_start, 2);
 				//		y_start = max(y_start, 2);
 				//	}
@@ -616,8 +616,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
 				//		y = (bm.bmHeight) * min(w1, w2);
 				//		x_end = floorf(x + 0.5);
 				//		y_end = floorf(y + 0.5);
-				//		x_start = floorf((screenx / 2.0 - x / 2.0) + 0.5f);
-				//		y_start = floorf((screeny / 2.0 - y / 2.0) + 0.5f);
+				//		x_start = floorf((screenx / 2.f - x / 2.f) + 0.5f);
+				//		y_start = floorf((screeny / 2.f - y / 2.f) + 0.5f);
 				//		x_start = max(x_start, 2);
 				//		y_start = max(y_start, 2);
 				//	}

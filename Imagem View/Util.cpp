@@ -1191,7 +1191,7 @@ img_basis* read_png(FILE* f/*, int sig_read*/){
 		interlace_type;
 
 	img_basis* img = 0;
-	int row = 0;
+	uint row = 0;
 	png_bytep* row_pointers = 0;
 
 	if (!f)
@@ -1334,10 +1334,10 @@ img_basis* read_png(FILE* f/*, int sig_read*/){
 
 	//if (png_get_bKGD(png_ptr, info_ptr, &image_background) != 0)
 	//	png_set_background(png_ptr, image_background,
-	//		PNG_BACKGROUND_GAMMA_FILE, 1, 1.0);
+	//		PNG_BACKGROUND_GAMMA_FILE, 1, 1.f);
 	//else
 	//	png_set_background(png_ptr, &my_background,
-	//		PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.0);
+	//		PNG_BACKGROUND_GAMMA_SCREEN, 0, 1.f);
 
 	/* Some suggestions as to how to get a screen gamma value.
 	 *
@@ -1354,7 +1354,7 @@ img_basis* read_png(FILE* f/*, int sig_read*/){
 	// {
 	//	screen_gamma = PNG_DEFAULT_sRGB; /* A good guess for a PC monitor
 	//										in a dimly lit room */
-	//	screen_gamma = PNG_GAMMA_MAC_18 or 1.0; /* Good guesses for Mac
+	//	screen_gamma = PNG_GAMMA_MAC_18 or 1.f; /* Good guesses for Mac
 	//											   systems */
 	// }
 
@@ -1813,9 +1813,9 @@ img_basis* read_PCX_file(FILE* f) {
 			case PCX_1BIT_x:
 			{
 				byte* innerSrc = p;
-				for (int plane = 0; plane < h->nplanes; plane++) {
-					int x = 0;
-					for (int bpline = 0; bpline < h->bytesperline; bpline++) {
+				for (uint plane = 0; plane < h->nplanes; plane++) {
+					uint x = 0;
+					for (uint bpline = 0; bpline < uint(h->bytesperline); bpline++) {
 						byte bits = *innerSrc++;
 						for (int k = 7; k >= 0; k--) {
 							unsigned bit = (bits >> k) & 1;							
@@ -1833,7 +1833,7 @@ img_basis* read_PCX_file(FILE* f) {
 			case PCX_2BIT:
 			case PCX_4BIT:
 			{
-				for (int i = 0; i < width; i++) {
+				for (uint i = 0; i < width; i++) {
 					if (h->bitsperpixel == 1) {
 						*(dst) = ((p[i / 8] >> (7 - i % 8)) & 0x01);
 						dst += 4;
@@ -1851,7 +1851,7 @@ img_basis* read_PCX_file(FILE* f) {
 			}
 			case PCX_8BIT:
 			{
-				for (int i = 0; i < width; i++)
+				for (uint i = 0; i < width; i++)
 				{					
 					*dst = p[i];// first pass, just store the colour index
 					dst += 4;
@@ -1860,7 +1860,7 @@ img_basis* read_PCX_file(FILE* f) {
 			}
 			case PCX_24BIT:
 			{
-				for (int i = 0; i < width; i++)
+				for (uint i = 0; i < width; i++)
 				{
 					*(dst++) = p[i + 2 * h->bytesperline];
 					*(dst++) = p[i + h->bytesperline];
@@ -1872,7 +1872,7 @@ img_basis* read_PCX_file(FILE* f) {
 			case PCX_32BIT:
 			{
 				img->hasAlpha = 1;
-				for (int i = 0; i < width; i++)
+				for (uint i = 0; i < width; i++)
 				{
 					*(dst++) = p[i + 2 * h->bytesperline];
 					*(dst++) = p[i + h->bytesperline];
@@ -2202,7 +2202,7 @@ img_basis* read_PNM_file(FILE* f) {
 	long fp = ftell(f);
 	int compression = 0;
 	int c = 0;
-	int xres = 0, yres = 0, bpp = 0, maxval=0;
+	int xres = 0, yres = 0, bpp = 1, maxval=0;
 	img_basis* img = 0;
 	printf("*** Reading PNM file ***\n");
 	if (!f)
@@ -2251,7 +2251,7 @@ img_basis* read_PNM_file(FILE* f) {
 				return 0;
 			}
 			byte* p = img->pixels;
-			for (int i = 0; i < img->dataSize; ) {
+			for (uint i = 0; i < img->dataSize; ) {
 				c = fgetc(f);
 				if (c == '1') {
 					*(p++) = 255;
@@ -2294,7 +2294,7 @@ img_basis* read_PNM_file(FILE* f) {
 				delete img;
 				return 0;
 			}
-			float mul = 255 / maxval;
+			float mul = 255.f / maxval;
 
 			img->dataSize = xres * yres;
 			img->bpp = 8;
@@ -2306,10 +2306,10 @@ img_basis* read_PNM_file(FILE* f) {
 				return 0;
 			}
 			byte* p = img->pixels;
-			for (int i = 0; i < img->dataSize; ) {
+			for (uint i = 0; i < img->dataSize; ) {
 				if ((c = readInt(f)) == -1)
 					break;
-				*(p++) = (byte)c*mul;
+				*(p++) = byte(c*mul);
 				i++;
 			}
 			break;
@@ -2330,7 +2330,7 @@ img_basis* read_PNM_file(FILE* f) {
 				fseek(f, fp, SEEK_SET);
 				return 0;
 			}
-			float mul = 255 / maxval;
+			float mul = 255.f / maxval;
 
 			img->dataSize = xres * yres * 3;
 			img->bpp = 24;
@@ -2342,10 +2342,10 @@ img_basis* read_PNM_file(FILE* f) {
 				return 0;
 			}
 			byte* p = img->pixels;
-			for (int i = 0; i < img->dataSize; ) {
+			for (uint i = 0; i < img->dataSize; ) {
 				if ((c = readInt(f)) == -1)
 					break;
-				*(p++) = (byte)c*mul;
+				*(p++) = byte(c*mul);
 				i++;
 			}
 			break;
@@ -2366,7 +2366,7 @@ img_basis* read_PNM_file(FILE* f) {
 				delete img;
 				return 0;
 			}
-			float mul = 255 / maxval;
+			float mul = 255.f / maxval;
 
 			img->dataSize = xres * yres * 1;
 			img->bpp = 8;
