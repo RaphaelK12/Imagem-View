@@ -48,15 +48,16 @@ Release/Targa View Release.exe
 *.bsc
 *.bak
 
+# Folders
 Debug
 Debug_DL
-Release_DLL/
+Release_DLL
 
 Imagem View/Debug
 Imagem View/Debug_DL
 Imagem View/Release
-Imagem View/Release_DLL/
+Imagem View/Release_DLL
 
+# Some garbage
 Imagem View/Release/Targa View.vcxproj.FileListAbsolute.txt
 Imagem View/Release_DLL/Targa View.vcxproj.FileListAbsolute.txt
-Targa View/Release/Targa View.vcxproj.FileListAbsolute.txt
