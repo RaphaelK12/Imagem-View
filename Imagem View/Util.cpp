@@ -2195,6 +2195,12 @@ int readInt(FILE* f) {
 				return n;
 			}
 		}
+		else {
+			if (count > 0) {
+				fseek(f, -1, SEEK_CUR);
+				return n;
+			}
+		}
 	}
 }
 
@@ -2230,7 +2236,11 @@ img_basis* read_PNM_file(FILE* f) {
 	//if(!fscanf(f, "%i", &xres))		return 0;
 	//if(!fscanf(f, "%i", &yres))		return 0;
 	img = new img_basis;
-	if (!img)	return 0;
+	if (!img) {
+		printf("*** img == NULL ***\n");
+		fseek(f, fp, SEEK_SET);
+		return 0;
+	}
 	img->xres = xres;
 	img->yres = yres;
 
@@ -2330,6 +2340,8 @@ img_basis* read_PNM_file(FILE* f) {
 				fseek(f, fp, SEEK_SET);
 				return 0;
 			}
+			//c= fgetc(f);
+			//c= fgetc(f);
 			float mul = 255.f / maxval;
 
 			img->dataSize = xres * yres * 3;
@@ -2360,14 +2372,14 @@ img_basis* read_PNM_file(FILE* f) {
 			//		return 0;
 			//	}
 			//}
-			maxval = readInt(f);
-			if (maxval < 1 || maxval > 255) {
-				fseek(f, fp, SEEK_SET);
-				delete img;
-				return 0;
-			}
-			float mul = 255.f / maxval;
-
+			//maxval = readInt(f);
+			//if (maxval < 1 || maxval > 255) {
+			//	fseek(f, fp, SEEK_SET);
+			//	delete img;
+			//	return 0;
+			//}
+			//float mul = 255.f / maxval;
+			c = fgetc(f); // skip new line
 			img->dataSize = xres * yres * 1;
 			img->bpp = 8;
 			img->chanels = 1;
@@ -2377,7 +2389,7 @@ img_basis* read_PNM_file(FILE* f) {
 				delete img;
 				return 0;
 			}
-			byte* data = new byte[img->xres];
+			byte* data = new byte[img->xres+8];
 			if (!data) {
 				fseek(f, fp, SEEK_SET);
 				delete img;
@@ -2385,25 +2397,83 @@ img_basis* read_PNM_file(FILE* f) {
 			}
 			byte* p = img->pixels;
 			for (int height = 0; height < img->yres; height++) { // binary format 1 bpp
-				fread(data, 1, (img->xres + 7) / bpp, f);
+				fread(data, 1, (img->xres + 7) /*/ bpp*/, f);
 				for (int i = 0; i < img->xres; i++) {
-					if (bpp == 1) {
+					//if (bpp == 1) {
 						*(p++) = ((data[i / 8] >> (7 - i % 8)) & 0x01);
-					}
-					else if (bpp == 2) {
-						*(p++) = ((data[i / 4] >> ((3 - i % 4) * 2)) & 0x03);
-					}
-					else if (bpp == 4) {
-						*(p++) = ((data[i / 2] >> ((1 - i % 2) * 4)) & 0x0F);
-					}
+					//}
+					//else if (bpp == 2) {
+					//	*(p++) = ((data[i / 4] >> ((3 - i % 4) * 2)) & 0x03);
+					//}
+					//else if (bpp == 4) {
+					//	*(p++) = ((data[i / 2] >> ((1 - i % 2) * 4)) & 0x0F);
+					//}
 				}
-
 				//if ((c = readInt(f)) == -1)
 				//	break;
 				//*(p++) = (byte)c * mul;
 				//i++;
 			}
 			delete[] data;
+			break;
+		}
+		case '5': // binary format 8 bpp
+		{
+			maxval = readInt(f);
+			if (maxval < 1 || maxval > 255) {
+				delete img;
+				fseek(f, fp, SEEK_SET);
+				return 0;
+			}
+			float mul = 255.f / maxval;
+			skipLine(f); // skip new line
+			img->dataSize = xres * yres * 1;
+			img->bpp = 8;
+			img->chanels = 1;
+			img->pixels = new byte[img->dataSize];
+			if (!img->pixels) {
+				fseek(f, fp, SEEK_SET);
+				delete img;
+				return 0;
+			}
+			fread(img->pixels, 1, (img->dataSize), f);
+			break;
+		}
+		case '6': // binary format 1 bpp
+		{
+			maxval = readInt(f);
+			if (maxval < 1 || maxval > 255) {
+				delete img;
+				fseek(f, fp, SEEK_SET);
+				return 0;
+			}
+			float mul = 255.f / maxval;
+
+			//c = fgetc(f); // skip new line
+			//skipLine(f); // skip new line
+			skipLine(f); // skip new line
+			//c = fgetc(f); // skip new line
+			//c = fgetc(f); // skip new line
+			//c = fgetc(f); // skip new line
+			img->dataSize = xres * yres * 3;
+			img->bpp = 24;
+			img->chanels = 3;
+			img->pixels = new byte[img->dataSize];
+			if (!img->pixels) {
+				fseek(f, fp, SEEK_SET);
+				delete img;
+				return 0;
+			}
+			fread(img->pixels, 1, (img->dataSize), f);
+			byte* p = img->pixels;
+			c = 0;
+			for (int i = 0; i < img->xres * img->yres; i++) {
+				c = byte(p[0] * mul);
+				p[0] = byte(p[2] * mul);
+				p[2] = byte(c);
+				p[1] = byte(p[1] * mul);
+				p += 3;
+			}
 			break;
 		}
 		default:{
@@ -2433,44 +2503,44 @@ img_basis* read_PNM_file(FILE* f) {
 					p[i * 4 + 2] = img->pixels[i];
 					p[i * 4 + 3] = 255;
 				}
-				delete[] img->pixels;
-				img->pixels = p;
-				p = 0;
-				img->bpp = 32;
-				img->chanels = 4;
-				img->dataSize = img->xres * img->yres * img->bpp / 8;
+				//delete[] img->pixels;
+				//img->pixels = p;
+				//p = 0;
+				//img->bpp = 32;
+				//img->chanels = 4;
+				//img->dataSize = img->xres * img->yres * img->bpp / 8;
 				break;
 			}
 			case 2:
 			{
 				for (int i = 0; i < img->xres * img->yres; i++) {
-					p[i * 4 + 0] = img->pixels[i*2];
-					p[i * 4 + 1] = img->pixels[i*2];
-					p[i * 4 + 2] = img->pixels[i*2];
-					p[i * 4 + 3] = img->pixels[i*2+1];
+					p[i * 4 + 0] = img->pixels[i * 2];
+					p[i * 4 + 1] = img->pixels[i * 2];
+					p[i * 4 + 2] = img->pixels[i * 2];
+					p[i * 4 + 3] = img->pixels[i * 2 + 1];
 				}
-				delete[] img->pixels;
-				img->pixels = p;
-				p = 0;
-				img->bpp = 32;
-				img->chanels = 4;
-				img->dataSize = img->xres * img->yres * img->bpp / 8;
+				//delete[] img->pixels;
+				//img->pixels = p;
+				//p = 0;
+				//img->bpp = 32;
+				//img->chanels = 4;
+				//img->dataSize = img->xres * img->yres * img->bpp / 8;
 				break;
 			}
 			case 3:
 			{
 				for (int i = 0; i < img->xres * img->yres; i++) {
-					p[i * 4 + 0] = img->pixels[i*3+0];
-					p[i * 4 + 1] = img->pixels[i*3+1];
-					p[i * 4 + 2] = img->pixels[i*3+2];
+					p[i * 4 + 0] = img->pixels[i * 3 + 0];
+					p[i * 4 + 1] = img->pixels[i * 3 + 1];
+					p[i * 4 + 2] = img->pixels[i * 3 + 2];
 					p[i * 4 + 3] = 255;
 				}
-				delete[] img->pixels;
-				img->pixels = p;
-				p = 0;
-				img->bpp = 32;
-				img->chanels = 4;
-				img->dataSize = img->xres * img->yres * img->bpp / 8;
+				//delete[] img->pixels;
+				//img->pixels = p;
+				//p = 0;
+				//img->bpp = 32;
+				//img->chanels = 4;
+				//img->dataSize = img->xres * img->yres * img->bpp / 8;
 				break;
 			}
 			case 4:
@@ -2488,6 +2558,12 @@ img_basis* read_PNM_file(FILE* f) {
 				return 0;
 			}
 		}
+		delete[] img->pixels;
+		img->pixels = p;
+		p = 0;
+		img->bpp = 32;
+		img->chanels = 4;
+		img->dataSize = img->xres * img->yres * img->bpp / 8;
 	}
 	return img;
 }
