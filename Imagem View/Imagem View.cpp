@@ -167,12 +167,14 @@ int OpenImg(int get, HWND hwnd, const char * a)
 	}
 	if (hbmmask) {
 		float alpha = 0.f;
+#pragma warning(disable:4244)
 		for (int x = 0; x < img->xres * img->yres; x++) {
 			alpha = img->pixels[x * 4 + 3] / 254.5f;
 			img->pixels[x * 4 + 0] *= alpha; //  img->pixels[x * 4 + 3];
 			img->pixels[x * 4 + 1] *= alpha; //  img->pixels[x * 4 + 3];
 			img->pixels[x * 4 + 2] *= alpha; //  img->pixels[x * 4 + 3];
 		}
+#pragma warning(default:4244)
 		//SetBitmapBits(hbm1, img->dataSize, img->pixels);
 		SetDIBits(hdc, hbmmask, 0, img->yres, img->pixels, bi, DIB_RGB_COLORS);
 	}
